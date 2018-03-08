@@ -28,8 +28,10 @@ You can also specify `--json` output. By default, writes a CSV file.
 # Example usage
 
 ```
-pip3 install shodan
-python3 mcd.py --key kpVD7oF01vn1I9q6AfqGeqA2wkqJu9up
+> git clone git@github.com:JLospinoso/memcachedump.git
+> cd memcachedump
+> pip3 install shodan
+> python3 mcd.py --key kpVD7oF01vn1I9q6AfqGeqA2wkqJu9up
 Results found: 108877
 [ ] Found memcached server at IP: 115.159.38.63
 [ ] Found memcached server at IP: 37.220.12.242
