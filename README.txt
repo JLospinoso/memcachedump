@@ -1,4 +1,4 @@
-![Beamgun Infographic](https://github.com/JLospinoso/beamgun/raw/master/memcachedump.png)
+![Beamgun Infographic](https://github.com/JLospinoso/memcachedump/raw/master/memcachedump.png)
 
 `memcachedump` is a tool for dumping the cache contents of exposed memcached servers into local text files.
 
