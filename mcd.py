@@ -20,7 +20,7 @@ def make_query(query, s, chunk=4096):
         if not data:
             raise Exception("Broken socket")
         buf += data
-    return buf[:-2].decode("ISO-8859-1").split("\r\n")
+    return buf[:-2].decode().split("\r\n")
 
 
 def get_key_lengths(s):
@@ -49,7 +49,8 @@ def dump_values(keys, s):
 def scrape(server, outdir, as_json):
     print("[ ] Connecting to {}:{}.".format(
         server.get("ip_str"), server.get("port")))
-    s = socket.create_connection((server.get("ip_str"), server.get("port")))
+    s = socket.create_connection(
+        (server.get("ip_str"), server.get("port")), timeout=5)
     ip = server.get("ip_str")
     key_lengths = get_key_lengths(s)
     print("[ ] Found {} key lengths at {}.".format(len(key_lengths), ip))
@@ -79,7 +80,7 @@ def get_servers(api_key):
     memcached_servers = []
     try:
         results = api.search("product:memcached")
-        print("Results found: %s" % results["total"])
+        print("Results found: {}".format(results["total"]))
         for result in results.get("matches"):
             elem = {"ip_str": result.get("ip_str"), "port": result.get("port")}
             memcached_servers.append(elem)
