@@ -6,7 +6,8 @@ import json
 import csv
 import argparse
 import os
-
+from os import listdir
+from os.path import isfile, join
 
 def make_query(query, s, chunk=4096):
     s.sendall("{}\r\n".format(query).encode())
@@ -72,7 +73,7 @@ def scrape(ip, outdir, as_json):
         print("[+] Wrote CSV to {}".format(fname))
 
 
-def get_servers(api_key):
+def get_servers(api_key,continue_flag, outdir):
     api = shodan.Shodan(api_key)
     memcached_servers = []
     try:
@@ -83,6 +84,10 @@ def get_servers(api_key):
             print('[ ] Found memcached server at IP: {}'.format(result['ip_str']))
     except shodan.APIError as e:
         print('[-] Shodan error: %s' % e)
+    if continue_flag:
+        # Get files currently in output directory and remove .csv or .json extension so we just have the IP address
+        currentfiles = [os.path.splitext(f)[0] for f in listdir(outdir) if isfile(join(outdir, f))]
+        memcached_servers = [x for x in memcached_servers if x not in currentfiles]     
     return memcached_servers
 
 
@@ -90,10 +95,11 @@ parser = argparse.ArgumentParser(description='Scrape data from memcached servers
 parser.add_argument('--key', type=str, help='Shodan API key.')
 parser.add_argument('--out', type=str, default="out", help='Output directory for caches.')
 parser.add_argument('--json', action='store_true', default=False, help='Output as JSON. (Default: CSV)')
+parser.add_argument('--continue', dest='continue_flag', default=False, action='store_true', help='Continue, ignoring servers already listed in output directory.')
 args = parser.parse_args()
 if not os.path.exists(args.out):
     os.makedirs(args.out)
-for server in get_servers(args.key):
+for server in get_servers(args.key, args.continue_flag, args.out):
     try:
         scrape(server, args.out, args.json)
     except Exception as e:
