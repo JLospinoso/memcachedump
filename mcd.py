@@ -133,7 +133,7 @@ def get_servers_zoomeye(api_key, continue_flag, outdir):
 
 parser = argparse.ArgumentParser(description='Scrape data from memcached servers.')
 parser.add_argument('--key', type=str, help='Shodan API key.')
-parser.add_argument('--email', type=str, help='ZoomEye Email')
+parser.add_argument('--email', dest='username', type=str, help='ZoomEye Email')
 parser.add_argument('--password', type=str, help='ZoomEye Password')
 parser.add_argument('--out', type=str, default="out", help='Output directory for caches.')
 parser.add_argument('--json', action='store_true', default=False, help='Output as JSON. (Default: CSV)')
