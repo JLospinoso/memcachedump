@@ -112,7 +112,7 @@ def get_servers_zoomeye(api_key, continue_flag, outdir):
     zoomeye_dork_api = "https://api.zoomeye.org/host/search"
     headers = {'Authorization': 'JWT %s' % api_key}
 
-    for i in range (1,3):
+    for i in range (1,501):
         #Max. Allowed Page Limits -> 500
         params = {'query': 'app:"memcached"', 'page': i, 'facet':['ip']}
         resp = requests.get(zoomeye_dork_api, params=params, headers=headers)
