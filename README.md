@@ -2,7 +2,7 @@
 
 `memcachedump` is a tool for dumping the cache contents of exposed memcached servers into local text files.
 
-You'll need Python 3 and a [Shodan API Key](https://developer.shodan.io/api) or a [ZoomEye Account](https://www.zoomeye.org/).
+You'll need Python 3 along with [Shodan API Key](https://developer.shodan.io/api) or [ZoomEye Credentials](https://www.zoomeye.org/).
 
 # Running the tool:
 
@@ -15,8 +15,8 @@ Scrape data from memcached servers.
 optional arguments:
   -h, --help           show this help message and exit
   --key KEY            Shodan API key.
-  --email EMAIL        ZoomEye Email
-  --password PASSWORD  ZoomEye Password
+  --email EMAIL        ZoomEye Email.
+  --password PASSWORD  ZoomEye Password.
   --out OUT            Output directory for caches.
   --json               Output as JSON. (Default: CSV)
 ```
@@ -28,7 +28,6 @@ Optionally, you can specify an `--out` directory for the text files. By default,
 You can also specify `--json` output. By default, writes a CSV file.
 
 # Example usage
-<hr>
 
 ```
 > git clone git@github.com:JLospinoso/memcachedump.git
@@ -36,7 +35,7 @@ You can also specify `--json` output. By default, writes a CSV file.
 > pip3 install shodan
 ```
 
-# Using Shodan API Key
+### Using Shodan API Key
 ```
 > python3 mcd.py --key kpVD7oF01vn1I9q6AfqGeqA2wkqJu9up
 Results found: 108877
@@ -69,7 +68,7 @@ Results found: 108877
 ...
 ```
 
-# Using ZoomEye Credentials
+### Using ZoomEye Credentials
 ```
 > python3 mcd.py --email xyz@xyz.com --password xyz123abc
 [ ] Found memcached server at IP: 115.159.38.63
