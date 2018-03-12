@@ -6,6 +6,8 @@ import json
 import csv
 import argparse
 import os
+import json
+import requests
 
 
 def make_query(query, s, chunk=4096):
@@ -85,15 +87,56 @@ def get_servers(api_key):
         print('[-] Shodan error: %s' % e)
     return memcached_servers
 
+def zoomeye_login(username, password):
+    zoomeye_auth_api = "https://api.zoomeye.org/user/login"
+    data = '{{"username": "{}", "password": "{}"}}'.format(username, password)
+    resp = requests.post(zoomeye_auth_api, data=data)
+
+    if resp and resp.status_code == 200 and 'access_token' in resp.json():
+        token  = resp.json().get('access_token')
+        return token
+    else:
+        print('[-] ZoomEye Authentication Error')
+        exit()
+
+def get_servers_zoomeye(api_key):
+    servers = []
+    zoomeye_dork_api = "https://api.zoomeye.org/host/search"
+    headers = {'Authorization': 'JWT %s' % api_key}
+
+    for i in range (1,3):
+        #Max. Allowed Page Limits -> 500
+        params = {'query': 'app:"memcached"', 'page': i, 'facet':['ip']}
+        resp = requests.get(zoomeye_dork_api, params=params, headers=headers)
+
+        if resp and resp.status_code == 200 and 'matches' in resp.json():
+            matches = resp.json().get('matches')
+            for i in matches:
+                print('[ ] Found memcached server at IP: {}'.format(i.get('ip')))
+                servers.append(i.get('ip'))
+        else:
+            print('[-] ZoomEye Error')
+            break;
+
+    return servers
+
 
 parser = argparse.ArgumentParser(description='Scrape data from memcached servers.')
 parser.add_argument('--key', type=str, help='Shodan API key.')
+parser.add_argument('--email', type=str, help='ZoomEye Email')
+parser.add_argument('--password', type=str, help='ZoomEye Password')
 parser.add_argument('--out', type=str, default="out", help='Output directory for caches.')
 parser.add_argument('--json', action='store_true', default=False, help='Output as JSON. (Default: CSV)')
 args = parser.parse_args()
 if not os.path.exists(args.out):
     os.makedirs(args.out)
-for server in get_servers(args.key):
+if(args.username and args.password):
+    api_key = zoomeye_login(args.username, args.password)
+    servers = get_servers_zoomeye(api_key)
+else:
+    servers = get_servers(args.key)
+
+for server in servers:
     try:
         scrape(server, args.out, args.json)
     except Exception as e:
